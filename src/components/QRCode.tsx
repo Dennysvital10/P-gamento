@@ -16,6 +16,12 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
     const generateQRCode = async () => {
       try {
         setIsLoading(true);
+        
+        // Check if Supabase environment variables are available
+        if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+          throw new Error('Supabase configuration is missing. Please connect to Supabase first.');
+        }
+
         const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pix-qrcode`, {
           method: 'POST',
           headers: {
@@ -38,8 +44,15 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
 
         const data = await response.json();
         setQrCodeData(data.qrCodeImage);
-      } catch (err) {
+        
+        // Set the PIX code in the parent component
+        if (data.qrCodeText) {
+          // You can implement this later if needed
+          // onPixCodeGenerated(data.qrCodeText);
+        }
+      } catch (err: any) {
         setError(err.message);
+        console.error('QR Code generation error:', err);
       } finally {
         setIsLoading(false);
       }
@@ -50,8 +63,9 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
 
   if (error) {
     return (
-      <div className="text-red-500 text-center">
-        Erro ao gerar QR Code. Por favor, tente novamente.
+      <div className="text-red-500 text-center p-4 bg-red-900/20 rounded-lg">
+        <p className="font-medium mb-2">Erro ao gerar QR Code</p>
+        <p className="text-sm opacity-80">{error}</p>
       </div>
     );
   }
