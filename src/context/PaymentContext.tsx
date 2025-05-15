@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 // Payment data types
 type PaymentData = {
@@ -48,6 +48,24 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
 
   const [paymentData, setPaymentData] = useState<PaymentData>(defaultPaymentData);
   const [currentPage, setCurrentPage] = useState<PaymentPage>('summary');
+
+  // Load payment data from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlPaymentData: Partial<PaymentData> = {
+      recipient: params.get('recipient') || defaultPaymentData.recipient,
+      amount: `R$${params.get('amount') || '945,00'}`,
+      service: params.get('service') || defaultPaymentData.service,
+      location: params.get('location') || defaultPaymentData.location,
+      startDate: params.get('startDate') || defaultPaymentData.startDate,
+      duration: params.get('duration') || defaultPaymentData.duration,
+      status: 'pending',
+    };
+
+    if (Object.keys(urlPaymentData).some(key => urlPaymentData[key as keyof PaymentData])) {
+      setPaymentData(prevData => ({ ...prevData, ...urlPaymentData }));
+    }
+  }, []);
 
   // Navigation functions
   const proceedToPayment = () => {
