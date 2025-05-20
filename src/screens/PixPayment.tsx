@@ -23,16 +23,42 @@ const PixPayment: React.FC = () => {
     }, 3000);
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setPaymentStatus('success');
+    try {
+      const response = await fetch('https://mandrill-cal-pagamento-production.up.railway.app/pagamento/verificar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          valor: parseFloat(paymentData.amount.replace('R$', '').replace(',', '.')),
+          identificador: crypto.randomUUID()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao verificar pagamento');
+      }
+
+      const data = await response.json();
+      
+      if (data.status === 'CONCLUIDO') {
+        setPaymentStatus('success');
+        setShowFeedback(true);
+        setTimeout(() => {
+          confirmPayment();
+        }, 2000);
+      } else {
+        setPaymentStatus('error');
+        setShowFeedback(true);
+      }
+    } catch (error) {
+      setPaymentStatus('error');
       setShowFeedback(true);
-      setTimeout(() => {
-        confirmPayment();
-      }, 2000);
-    }, 1500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (showCancelScreen) {
@@ -138,7 +164,7 @@ const PixPayment: React.FC = () => {
       
       <Feedback 
         type="error"
-        message="O tempo para pagamento expirou. Tente novamente."
+        message="Pagamento não encontrado. Tente novamente."
         visible={showFeedback && paymentStatus === 'error'}
         onClose={() => setShowFeedback(false)}
       />

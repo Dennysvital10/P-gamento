@@ -17,15 +17,9 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
       try {
         setIsLoading(true);
         
-        // Check if Supabase environment variables are available
-        if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-          throw new Error('Supabase configuration is missing. Please connect to Supabase first.');
-        }
-
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pix-qrcode`, {
+        const response = await fetch('https://mandrill-cal-pagamento-production.up.railway.app/pagamento/gerar-qrcode', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -44,12 +38,6 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
 
         const data = await response.json();
         setQrCodeData(data.qrCodeImage);
-        
-        // Set the PIX code in the parent component
-        if (data.qrCodeText) {
-          // You can implement this later if needed
-          // onPixCodeGenerated(data.qrCodeText);
-        }
       } catch (err: any) {
         setError(err.message);
         console.error('QR Code generation error:', err);
