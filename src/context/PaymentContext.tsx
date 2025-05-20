@@ -11,6 +11,7 @@ type PaymentData = {
   pixCode?: string;
   status: 'pending' | 'cancelled' | 'completed';
   identificador?: string;
+  uid?: string;
 };
 
 // Payment page states
@@ -39,12 +40,12 @@ type PaymentProviderProps = {
 export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) => {
   // Default payment data
   const defaultPaymentData: PaymentData = {
-    recipient: 'Mandrill Filmes',
-    amount: 'R$945,00',
-    service: 'Cobertura Digital',
-    location: 'São Paulo, SP',
-    startDate: '15/10/2023 - 14:30',
-    duration: '8',
+    recipient: '',
+    amount: '',
+    service: '',
+    location: '',
+    startDate: '',
+    duration: '',
     status: 'pending',
   };
 
@@ -55,18 +56,18 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlPaymentData: Partial<PaymentData> = {
-      recipient: params.get('recipient') || defaultPaymentData.recipient,
-      amount: params.get('amount') ? `R$${params.get('amount')}` : defaultPaymentData.amount,
-      service: params.get('service') || defaultPaymentData.service,
-      location: params.get('location') || defaultPaymentData.location,
-      startDate: params.get('startDate') || defaultPaymentData.startDate,
-      duration: params.get('duration') || defaultPaymentData.duration,
+      recipient: params.get('recipient') || '',
+      amount: params.get('amount') || '',
+      service: params.get('service') || '',
+      location: params.get('location') || '',
+      startDate: params.get('startDate') || '',
+      duration: params.get('duration') || '',
+      uid: params.get('uid') || '',
       status: 'pending',
     };
 
-    if (Object.keys(urlPaymentData).some(key => urlPaymentData[key as keyof PaymentData])) {
-      setPaymentData(prevData => ({ ...prevData, ...urlPaymentData }));
-    }
+    console.log('URL Payment Data:', urlPaymentData);
+    setPaymentData(prevData => ({ ...prevData, ...urlPaymentData }));
   }, []);
 
   const setPaymentIdentificador = (id: string) => {

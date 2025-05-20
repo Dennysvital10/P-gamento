@@ -12,7 +12,7 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { setPaymentIdentificador } = usePayment();
+  const { paymentData, setPaymentIdentificador } = usePayment();
 
   useEffect(() => {
     const generateQRCode = async () => {
@@ -28,12 +28,12 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            valor: parseFloat(value.replace('R$', '').replace(',', '.')),
-            chavePix: "test@example.com",
-            descricao: "Pagamento Mandrill Filmes",
+            valor: parseFloat(paymentData.amount),
+            chavePix: paymentData.uid,
+            descricao: paymentData.service,
             identificador,
-            nomeBeneficiario: "Mandrill Filmes",
-            cidadeBeneficiario: "SAO PAULO"
+            nomeBeneficiario: paymentData.recipient,
+            cidadeBeneficiario: paymentData.location
           }),
         });
 
@@ -51,8 +51,10 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
       }
     };
 
-    generateQRCode();
-  }, [value, setPaymentIdentificador]);
+    if (paymentData.amount && paymentData.uid) {
+      generateQRCode();
+    }
+  }, [paymentData, setPaymentIdentificador]);
 
   if (error) {
     return (
@@ -85,7 +87,7 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
         )}
       </div>
       <div className="mt-3 text-sm text-gray-400">
-        PIX para: Mandrill Filmes
+        PIX para: {paymentData.recipient}
       </div>
     </div>
   );
