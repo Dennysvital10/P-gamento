@@ -10,6 +10,7 @@ type PaymentData = {
   duration: string;
   pixCode?: string;
   status: 'pending' | 'cancelled' | 'completed';
+  identificador?: string;
 };
 
 // Payment page states
@@ -24,6 +25,7 @@ type PaymentContextType = {
   cancelPayment: () => void;
   goBack: () => void;
   resetPayment: () => void;
+  setPaymentIdentificador: (id: string) => void;
 };
 
 // Create context
@@ -54,7 +56,7 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
     const params = new URLSearchParams(window.location.search);
     const urlPaymentData: Partial<PaymentData> = {
       recipient: params.get('recipient') || defaultPaymentData.recipient,
-      amount: `R$${params.get('amount') || '945,00'}`,
+      amount: params.get('amount') ? `R$${params.get('amount')}` : defaultPaymentData.amount,
       service: params.get('service') || defaultPaymentData.service,
       location: params.get('location') || defaultPaymentData.location,
       startDate: params.get('startDate') || defaultPaymentData.startDate,
@@ -66,6 +68,10 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
       setPaymentData(prevData => ({ ...prevData, ...urlPaymentData }));
     }
   }, []);
+
+  const setPaymentIdentificador = (id: string) => {
+    setPaymentData(prev => ({ ...prev, identificador: id }));
+  };
 
   // Navigation functions
   const proceedToPayment = () => {
@@ -100,6 +106,7 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
     cancelPayment,
     goBack,
     resetPayment,
+    setPaymentIdentificador,
   };
 
   return <PaymentContext.Provider value={value}>{children}</PaymentContext.Provider>;

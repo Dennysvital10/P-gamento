@@ -33,7 +33,7 @@ const PixPayment: React.FC = () => {
         },
         body: JSON.stringify({
           valor: parseFloat(paymentData.amount.replace('R$', '').replace(',', '.')),
-          identificador: crypto.randomUUID()
+          identificador: paymentData.identificador
         }),
       });
 
@@ -96,7 +96,7 @@ const PixPayment: React.FC = () => {
           
           <div className="my-6">
             <QRCode 
-              value={paymentData.amount.replace('R$', '').trim()}
+              value={paymentData.amount}
               className="mb-8" 
             />
             

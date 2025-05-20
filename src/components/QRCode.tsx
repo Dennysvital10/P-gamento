@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
+import { usePayment } from '../context/PaymentContext';
 
 type QRCodeProps = {
   value: string;
@@ -11,12 +12,16 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { setPaymentIdentificador } = usePayment();
 
   useEffect(() => {
     const generateQRCode = async () => {
       try {
         setIsLoading(true);
         
+        const identificador = crypto.randomUUID();
+        setPaymentIdentificador(identificador);
+
         const response = await fetch('https://mandrill-cal-pagamento-production.up.railway.app/pagamento/gerar-qrcode', {
           method: 'POST',
           headers: {
@@ -26,7 +31,7 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
             valor: parseFloat(value.replace('R$', '').replace(',', '.')),
             chavePix: "test@example.com",
             descricao: "Pagamento Mandrill Filmes",
-            identificador: crypto.randomUUID(),
+            identificador,
             nomeBeneficiario: "Mandrill Filmes",
             cidadeBeneficiario: "SAO PAULO"
           }),
@@ -47,7 +52,7 @@ const QRCode: React.FC<QRCodeProps> = ({ value, size = 200, className = '' }) =>
     };
 
     generateQRCode();
-  }, [value]);
+  }, [value, setPaymentIdentificador]);
 
   if (error) {
     return (
